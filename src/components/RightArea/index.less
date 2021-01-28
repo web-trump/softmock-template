@@ -1,0 +1,51 @@
+.right-container {
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  .title {
+    font-size: 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    & * {
+      font-size: 12px !important;
+    }
+  }
+  .header-container {
+    background-color: #fff;
+    height: 40%;
+    padding: 0 16px 16px 16px;
+    border-radius: 5px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    & > div {
+      overflow: scroll;
+      height: 100%;
+    }
+  }
+  .content-container {
+    position: relative;
+    background-color: #fff;
+    flex: 1;
+    padding: 0 16px 16px 16px;
+    border-radius: 5px;
+    overflow: scroll;
+  }
+  .ant-switch.ant-switch-checked {
+    height: 24px;
+  }
+  .ant-tabs-card .ant-tabs-content {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex: 1;
+}

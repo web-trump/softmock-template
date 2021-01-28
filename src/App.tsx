@@ -1,9 +1,16 @@
 import React from "react";
-import logo from "./logo.svg";
+
+import LeftArea from "./components/LeftArea";
+import RightArea from "./components/RightArea";
 import "./App.less";
 
 function App() {
-  return <div className="App">12</div>;
+  return (
+    <div className="App">
+      <LeftArea></LeftArea>
+      <RightArea></RightArea>
+    </div>
+  );
 }
 
 export default App;

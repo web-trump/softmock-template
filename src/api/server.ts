@@ -9,8 +9,8 @@ const request = axios.create({
 });
 
 /**拦截器 */
-axios.interceptors.response.use((res) => {
-  return res;
+request.interceptors.response.use((res) => {
+  return res.data;
 });
 
 export default request;
