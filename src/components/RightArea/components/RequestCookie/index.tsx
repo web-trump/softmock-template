@@ -1,102 +1,61 @@
-import React, { useState, useMemo } from "react";
-import { Table, Input, Button } from "antd";
+import React, { useState, useEffect } from "react";
+import { toJS } from "mobx";
+import { observer } from "mobx-react";
+import jsBeautify from "js-beautify";
+import CodeMirror from "@uiw/react-codemirror";
+import "codemirror/keymap/sublime";
+import "codemirror/theme/eclipse.css";
+import store from "../../../store";
 
 import "./index.less";
 
-interface Props {
-  cookies: string;
-}
-
 function parseCookie(cookies: string) {
-  const result: any = [];
+  const result: any = {};
   for (let cookie of cookies.split(";")) {
     const [title, value] = cookie.split("=");
-    result.push({
-      title: title?.trim(),
-      value: value?.trim(),
-    });
+    result[title] = value;
   }
   return result;
 }
+function dumpCookie(cookies: any) {
+  return Object.keys(cookies)
+    .reduce((pre: any, next) => [...pre, `${next}=${cookies[next]}`], [])
+    .join(";");
+}
 
-export default function RequestHeader(props: Props) {
-  const { cookies } = props;
-  const dataSource = useMemo(() => {
-    return parseCookie(cookies);
-  }, [cookies]);
-  const [editCell, setEditCell] = useState({
-    record: null,
-    index: 0,
-  });
-  const onMouseEnter = (record: any, index: number) => {
-    setEditCell({ record, index });
+function RequestHeader() {
+  const { currentRequestHeader, currentRequest, theme, updateCurrentRequest } = store;
+  const [value, setValue] = useState<string>("");
+  const blurHandle = (instance: any) => {
+    const value = instance.getValue();
+    const headersJson = {
+      ...currentRequestHeader.headers,
+      Cookie: dumpCookie(JSON.parse(value)),
+    };
+    const headers = Object.keys(headersJson).reduce(
+      (pre: any, next) => [...pre, [next, headersJson[next]]],
+      []
+    );
+    currentRequest.request.headers = headers;
+    updateCurrentRequest(currentRequest);
   };
-  const onTextChange = (e: any) => {
-    console.log(e);
-  };
-  const addHandle = () => {};
-  const columns = [
-    {
-      title: "key",
-      dataIndex: "title",
-      key: "title",
-      width: "40%",
-      render(text: string, record: any, index: number) {
-        console.log("editCell", editCell, "record", record, "index", index);
-        if (record === editCell.record && index === editCell.index) {
-          return <Input defaultValue={text} size="middle" onChange={onTextChange}></Input>;
-        } else {
-          return (
-            <div onMouseEnter={() => onMouseEnter(record, index)} className="one-row">
-              {text}
-            </div>
-          );
-        }
-      },
-    },
-    {
-      title: "value",
-      dataIndex: "value",
-      key: "value",
-      width: "40%",
-      render(text: string, record: any, index: number) {
-        if (record === editCell.record && index === editCell.index) {
-          return <Input defaultValue={text} size="middle" onChange={onTextChange}></Input>;
-        } else {
-          return (
-            <div onMouseEnter={() => onMouseEnter(record, index)} className="one-row">
-              {text}
-            </div>
-          );
-        }
-      },
-    },
-    {
-      title: "操作",
-      dataIndex: "operate",
-      key: "operate",
-      width: "20%",
-      render() {
-        return <Button type="link">删除</Button>;
-      },
-    },
-  ];
+  useEffect(() => {
+    console.log("currentRequestHeader.cookies", toJS(currentRequestHeader.cookies));
+    setValue(jsBeautify(JSON.stringify(parseCookie(currentRequestHeader.cookies || ""))));
+  }, [currentRequestHeader]);
   return (
-    <>
-      <div className="add-container">
-        <Button size="small" onClick={addHandle}>
-          添加
-        </Button>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        pagination={false}
-        sticky={true}
-        size="small"
-        bordered={true}
-        rowKey={() => Math.random().toString()}
-      ></Table>
-    </>
+    <div className="cookie-req-container">
+      <CodeMirror
+        value={value}
+        options={{
+          theme,
+          keyMap: "sublime",
+          mode: "javascript",
+        }}
+        onBlur={blurHandle}
+      />
+    </div>
   );
 }
+
+export default observer(RequestHeader);

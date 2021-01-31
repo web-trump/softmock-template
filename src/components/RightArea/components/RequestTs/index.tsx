@@ -8,18 +8,16 @@ import "codemirror/theme/eclipse.css";
 import store from "../../../store";
 import "./index.less";
 
-function ResponseTs() {
-  const { currentRequest, theme } = store;
+function RequestTs() {
+  const { currentRequestBody, theme } = store;
   const [value, setValue] = useState<string>("");
   useEffect(() => {
-    const value = currentRequest?.response?.html || "";
-    console.log("value", value);
     let result = "";
-    JsonToJS(JSON.parse(value)).forEach((typeInterface) => {
+    JsonToJS(JSON.parse(currentRequestBody)).forEach((typeInterface) => {
       result += typeInterface + "\n";
     });
     setValue(result);
-  }, [currentRequest]);
+  }, [currentRequestBody]);
   return (
     <div className="ts-body-container">
       <CodeMirror
@@ -35,4 +33,4 @@ function ResponseTs() {
   );
 }
 
-export default observer(ResponseTs);
+export default observer(RequestTs);

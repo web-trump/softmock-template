@@ -5,7 +5,16 @@ import { observer } from "mobx-react";
 import jsBeautify from "js-beautify";
 import { toJS } from "mobx";
 import "codemirror/keymap/sublime";
-import "codemirror/theme/eclipse.css";
+
+import "codemirror/addon/scroll/annotatescrollbar.js";
+import "codemirror/addon/search/matchesonscrollbar.js";
+import "codemirror/addon/search/match-highlighter.js";
+import "codemirror/addon/search/jump-to-line.js";
+
+import "codemirror/addon/dialog/dialog.js";
+import "codemirror/addon/dialog/dialog.css";
+import "codemirror/addon/search/searchcursor.js";
+import "codemirror/addon/search/search.js";
 
 import store from "../../../store";
 import "./index.less";
@@ -13,16 +22,13 @@ import "./index.less";
 const TextArea = Input.TextArea;
 
 function ResponseBody() {
-  const { currentRequest, codeMode, updateCurrentRequest } = store;
+  const { currentRequest, codeMode, theme, updateCurrentRequest } = store;
   const { response } = currentRequest || {};
   const [value, setValue] = useState<string>("");
-  const changeHandle = (e: any) => {
-    // const value = instance.getValue();
-    const value = e.target.value;
-    setValue(value);
-  };
-  const blurHandle = () => {
-    const cR = toJS(currentRequest);
+
+  const blurHandle = (instance: any) => {
+    const value = instance.getValue();
+    const cR = toJS(store.currentRequest);
     if (cR.response) {
       cR.response.html = value;
       /** 更新数据库的html */
@@ -30,28 +36,23 @@ function ResponseBody() {
     }
   };
   useEffect(() => {
-    const text = jsBeautify(response?.html || "");
+    const text =
+      codeMode === "javascript" || codeMode === "json"
+        ? jsBeautify(response?.html || "")
+        : response?.html || "";
     setValue(text);
   }, [response?.html, response]);
   return (
     <div className="res-body-container">
-      <TextArea
+      <CodeMirror
         value={value}
-        onChange={changeHandle}
+        options={{
+          theme,
+          keyMap: "sublime",
+          mode: codeMode,
+        }}
         onBlur={blurHandle}
-        autoSize={{ maxRows: 10, minRows: 10 }}
-      ></TextArea>
-      {/* {init && (
-        <CodeMirror
-          value={value}
-          height="100%"
-          options={{
-            keyMap: "sublime",
-            mode: codeMode,
-          }}
-          onChange={changeHandle}
-        />
-      )} */}
+      />
     </div>
   );
 }

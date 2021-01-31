@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   background-color: #041527;
-  padding: 30px 0 0 0;
+  padding: 20px 0 0 0;
   overflow: hidden;
   input {
     padding-left: 8px !important;
@@ -19,13 +19,39 @@
 .logo {
   position: sticky;
   top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-right: 30px;
+  color: #fff;
+  & > img:first-child {
+    width: 50%;
+    opacity: 0.7;
+  }
+  .setting {
+    width: 25px;
+    opacity: 0.7;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+    }
+  }
+  .clear-all {
+    width: 25px;
+    opacity: 0.7;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 .menu {
   flex: 1;
   overflow: scroll;
 }
 .footer {
-  height: 50px;
+  height: 40px;
   display: flex;
   align-items: center;
   color: #fff;
@@ -39,4 +65,36 @@
     color: #ccc;
     font-size: 14px;
   }
+}
+.link {
+  color: #97cd74;
+  display: flex;
+  align-items: center;
+  &::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: currentColor;
+    margin-right: 5px;
+    border-radius: 50%;
+  }
+}
+.no-link {
+  color: pink;
+  display: flex;
+  align-items: center;
+  &::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: currentColor;
+    margin-right: 5px;
+    border-radius: 50%;
+  }
+}
+.wrap {
+  height: 15px;
+  position: sticky;
+  top: 0;
+  color: #fff;
 }

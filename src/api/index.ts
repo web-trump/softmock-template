@@ -14,3 +14,5 @@ export const UpdateInfo = (url: string, detail: any): Promise<string> =>
   });
 /** 删除记录 */
 export const DeleteInfo = (url: string): Promise<string> => request.post("/delete_flow?url=" + url);
+/** 清除所有 */
+export const ClearAll = (): Promise<string> => request.post("/clear_all");

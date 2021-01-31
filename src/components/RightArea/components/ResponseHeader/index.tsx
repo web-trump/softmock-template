@@ -1,84 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Input, Button } from "antd";
+import { observer } from "mobx-react";
+import jsBeautify from "js-beautify";
+import CodeMirror from "@uiw/react-codemirror";
+import "codemirror/keymap/sublime";
+import "codemirror/theme/eclipse.css";
+import store from "../../../store";
 
 import "./index.less";
 
-interface Props {
-  dataSource: any;
-}
+function ResponseHeader() {
+  const [value, setValue] = useState<string>();
+  const { currentResponseHeader, currentRequest, theme, updateCurrentRequest } = store;
+  useEffect(() => {
+    setValue(jsBeautify(JSON.stringify(currentResponseHeader)));
+  }, [currentResponseHeader]);
+  const blurHandle = (instance: any) => {
+    const headersJson = JSON.parse(instance.getValue());
+    const headers = Object.keys(headersJson).reduce(
+      (pre: any, next) => [...pre, [next, headersJson[next]]],
+      []
+    );
+    if (currentRequest.response) {
+      currentRequest.response.headers = headers;
+    } else {
+      currentRequest.response = {
+        headers,
+      };
+    }
 
-export default function ResponseHeader(props: Props) {
-  const { dataSource } = props;
-  const [editCell, setEditCell] = useState({
-    record: null,
-    index: 0,
-  });
-  const onMouseEnter = (record: any, index: number) => {
-    setEditCell({ record, index });
+    updateCurrentRequest(currentRequest);
   };
-  const onTextChange = (e: any) => {
-    console.log(e);
-  };
-  const columns = [
-    {
-      title: "key",
-      dataIndex: "title",
-      width: "40%",
-      key: "title",
-      render(text: string, record: any, index: number) {
-        if (record === editCell.record && index === editCell.index) {
-          return <Input defaultValue={text} size="middle" onChange={onTextChange}></Input>;
-        } else {
-          return (
-            <div onMouseEnter={() => onMouseEnter(record, index)} className="one-row">
-              {text}
-            </div>
-          );
-        }
-      },
-    },
-    {
-      title: "value",
-      dataIndex: "value",
-      width: "40%",
-      key: "value",
-      render(text: string, record: any, index: number) {
-        if (record === editCell.record && index === editCell.index) {
-          return <Input defaultValue={text} size="middle" onChange={onTextChange}></Input>;
-        } else {
-          return (
-            <div onMouseEnter={() => onMouseEnter(record, index)} className="one-row">
-              {text}
-            </div>
-          );
-        }
-      },
-    },
-    {
-      title: "操作",
-      dataIndex: "operate",
-      key: "operate",
-      width: "20%",
-      render() {
-        return <Button type="link">删除</Button>;
-      },
-    },
-  ];
   return (
-    <>
-      <div className="add-container">
-        <Input placeholder="筛选..."></Input>
-        <Button size="small">添加</Button>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={dataSource}
-        pagination={false}
-        sticky={true}
-        size="small"
-        bordered={true}
-        rowKey={() => Math.random().toString()}
-      ></Table>
-    </>
+    <div className="header-body-container">
+      <CodeMirror
+        value={value}
+        options={{
+          theme,
+          keyMap: "sublime",
+          mode: "javascript",
+        }}
+        // onInputRead={changeHandle}
+        onBlur={blurHandle}
+      />
+    </div>
   );
 }
+
+export default observer(ResponseHeader);
