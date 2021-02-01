@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import { Input, Menu, Modal } from "antd";
+import { Input, Menu, Modal, message, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import GithubLogo from "../../assets/github.svg";
 import Logo from "../../assets/logo.jpg";
 import ClearLogo from "../../assets/clear.svg";
 import ThemeLogo from "../../assets/theme.svg";
+import AddLogo from "../../assets/add.svg";
 
 import store from "../store";
 import "./index.less";
+import { exception } from "console";
 
 const { SubMenu } = Menu;
+
+const Option = Select.Option;
+
+const selectBefore = (
+  <Select defaultValue="http://" className="select-before">
+    <Option value="http://">http://</Option>
+    <Option value="https://">https://</Option>
+  </Select>
+);
 
 function LeftArea() {
   const {
@@ -28,12 +39,16 @@ function LeftArea() {
     clearAll,
     setFilterText,
     switchTheme,
+    getFilterHistory,
+    createRequest,
   } = store;
   useEffect(() => {
     /** 启动websockt */
     getUpdates();
   }, []);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [newUrl, setNewUrl] = useState<string>("");
   const selectHandle = ({ key }: any) => {
     setCurrentRequest(key);
   };
@@ -52,17 +67,51 @@ function LeftArea() {
       Delete(url, his);
     }
   };
+  const addRequestHandle = async () => {
+    let scheme, host, path;
+    try {
+      scheme = newUrl.split("://")[0];
+      host = newUrl.split("://")[1].split("/")[0];
+      path =
+        Array.from(newUrl)
+          .slice((scheme + host).length + 3)
+          .join("")
+          .split("?")[0] || "/";
+    } catch (e) {
+      message.error("请输入正确的url");
+      return;
+    }
+    const host_filter = document.location.href.includes("host_filter=")
+      ? document.location.href.split("host_filter=")[1].split("&")[0]
+      : "";
+    if (!host.includes(host_filter)) {
+      message.error(`host必须包含${host_filter}`);
+      return;
+    }
+    /** 较检是否已经存在 */
+    const checked = !getFilterHistory(newUrl).length;
+    if (checked) {
+      setShowAddModal(false);
+      await createRequest(scheme.trim(), host.trim(), path.trim());
+      message.success("创建成功");
+    } else {
+      message.warn("链接已存在");
+    }
+  };
   return (
     <div className="left-container">
       <div className="logo">
-        <img src={Logo} alt="logo" />
-        <img src={ThemeLogo} className="setting" alt="主题" onClick={switchTheme} />
-        <img
-          className="clear-all"
-          src={ClearLogo}
-          alt="清除所有"
-          onClick={() => setShowModal(true)}
-        />
+        {/* <img src={Logo} alt="logo" /> */}
+        <div>
+          <img src={AddLogo} className="add" alt="添加" onClick={() => setShowAddModal(true)} />
+          <img src={ThemeLogo} className="setting" alt="主题" onClick={switchTheme} />
+          <img
+            className="clear-all"
+            src={ClearLogo}
+            alt="清除所有"
+            onClick={() => setShowModal(true)}
+          />
+        </div>
         <div className={linkStatus ? "link" : "no-link"}>{linkText}</div>
       </div>
       <div className="input-filter">
@@ -103,7 +152,8 @@ function LeftArea() {
         </Menu>
       </div>
       <div className="footer">
-        <img src={GithubLogo} alt="github" />
+        <img src={Logo} alt="logo" className="logo-img" />
+        <img src={GithubLogo} alt="github" className="github-img" />
         <a href="https://github.com/web-trump/soft-mock">Soft-mock Github</a>
       </div>
       <Modal
@@ -114,6 +164,20 @@ function LeftArea() {
         onCancel={() => setShowModal(false)}
         onOk={clearAllHandle}
       ></Modal>
+      <Modal
+        title="新建请求"
+        visible={showAddModal}
+        okText="确定"
+        cancelText="取消"
+        onCancel={() => setShowAddModal(false)}
+        onOk={addRequestHandle}
+      >
+        <Input
+          placeholder="请输入需要监听的url"
+          value={newUrl}
+          onChange={(e) => setNewUrl(e.target.value)}
+        ></Input>
+      </Modal>
     </div>
   );
 }

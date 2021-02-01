@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
-import { Input } from "antd";
 import { observer } from "mobx-react";
 import jsBeautify from "js-beautify";
 import { toJS } from "mobx";
@@ -18,8 +17,6 @@ import "codemirror/addon/search/search.js";
 
 import store from "../../../store";
 import "./index.less";
-
-const TextArea = Input.TextArea;
 
 function ResponseBody() {
   const { currentRequest, codeMode, theme, updateCurrentRequest } = store;

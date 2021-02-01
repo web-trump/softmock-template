@@ -23,23 +23,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
-  padding-right: 30px;
+  padding: 0 30px;
   color: #fff;
-  & > img:first-child {
-    width: 50%;
-    opacity: 0.7;
-  }
-  .setting {
-    width: 25px;
-    opacity: 0.7;
-    cursor: pointer;
-    &:hover {
-      opacity: 1;
-    }
-  }
+  .setting,
+  .add,
   .clear-all {
-    width: 25px;
+    width: 20px;
     opacity: 0.7;
+    margin-right: 15px;
     cursor: pointer;
     &:hover {
       opacity: 1;
@@ -54,12 +45,15 @@
   height: 40px;
   display: flex;
   align-items: center;
-  color: #fff;
   justify-content: center;
-  img {
+  color: #fff;
+  .github-img {
     width: 20px;
-    height: 20px;
     margin-right: 3px;
+  }
+  .logo-img {
+    width: 100px;
+    opacity: 0.5;
   }
   a {
     color: #ccc;

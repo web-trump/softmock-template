@@ -1,5 +1,6 @@
 import { action, autorun, makeAutoObservable, computed, runInAction } from "mobx";
-import { History, Updates, UpdateInfo, DeleteInfo, ClearAll } from "../api";
+import { History, Updates, UpdateInfo, DeleteInfo, ClearAll, CreateRecord } from "../api";
+import { uuid } from "../utils";
 
 class Store {
   constructor() {
@@ -42,12 +43,15 @@ class Store {
     return contentType ? contentType.split(";")[0].split("/")[1] : "html";
   }
   @computed get filterHistory() {
+    return this.getFilterHistory(this.filterText);
+  }
+  getFilterHistory = (text: string) => {
     return this.history.filter((item) => {
       const { scheme, host, path } = item.request;
       const url = scheme + "://" + host + path.split("?")[0];
-      return url.includes(this.filterText);
+      return url.includes(text);
     });
-  }
+  };
   /** 设置过滤文本 */
   @action setFilterText = (text: string) => {
     this.filterText = text;
@@ -175,6 +179,89 @@ class Store {
   };
 
   /** 设置当前请求体 */
+  /** 创建请求 */
+  createRequest = async (scheme: string, host: string, path: string) => {
+    const port = scheme === "https" ? 443 : 80;
+    /** 构建新的请求 */
+    const req: any = {
+      id: uuid(),
+      intercepted: false,
+      is_replay: null,
+      marked: false,
+      modified: false,
+      type: "http",
+      status: "1",
+    };
+    /** 默认的request */
+    req.request = {
+      contentHash: null,
+      contentLength: null,
+      headers: [
+        [
+          "user-agent",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36",
+        ],
+      ],
+      host,
+      http_version: "HTTP/2.0",
+      is_replay: false,
+      method: "GET",
+      path,
+      port,
+      pretty_host: host,
+      raw_content: "",
+      scheme,
+      timestamp_end: +(Date.now() / 1e3).toFixed(6),
+      timestamp_start: +((Date.now() - 1) / 1e3).toFixed(6),
+    };
+    /** 默认的response  */
+    req.response = {
+      contentHash: "e30be77de893682db1e583c6f4bc17a2a8c8c420736b8c4ac12b1d39abdfa9f4",
+      contentLength: 4550,
+      html: '{ "code" : 0, "msg" : "welcome to soft-mock" }',
+      headers: [
+        ["server", "Tengine"],
+        ["content-type", "application/json"],
+      ],
+      http_version: "HTTP/1.1",
+      is_replay: false,
+      reason: "OK",
+      status_code: 200,
+      timestamp_end: +(Date.now() / 1e3).toFixed(6),
+      timestamp_start: +((Date.now() - 1) / 1e3).toFixed(6),
+    };
+    /** server_conn */
+    req.server_conn = {
+      address: [host, port],
+      alpn_proto_negotiated: "h2",
+      cipher_list: null,
+      cipher_name: null,
+      error: null,
+      id: uuid(),
+      ip_address: ["114.80.187.67", port],
+      sni: host,
+      source_address: ["192.168.2.59", 50591],
+      state: 0,
+      timestamp_end: null,
+      timestamp_start: +((Date.now() - 1) / 1e3).toFixed(6),
+      timestamp_tcp_setup: +((Date.now() - 1) / 1e3).toFixed(6),
+      timestamp_tls_setup: +((Date.now() - 1) / 1e3).toFixed(6),
+      tls: null,
+      tls_established: true,
+      tls_version: "TLSv1.3",
+      via: null,
+      via2: null,
+    };
+    /** 请求接口 */
+    await CreateRecord(scheme + "://" + host + path, {
+      cmd: "update",
+      resource: "flows",
+      data: req,
+    });
+    /** 更新history */
+    this.history.push(req);
+    this.index = "0-0";
+  };
 }
 
 export default new Store();

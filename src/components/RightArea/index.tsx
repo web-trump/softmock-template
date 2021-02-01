@@ -92,12 +92,18 @@ function RightArea() {
       {currentUrl}
     </div>
   );
-  const requestMethod = currentRequest.request?.method || "GET";
+  const requestMethod = currentRequest?.request?.method || "GET";
   const contentType =
     currentRequestHeader?.headers?.["content-type"] ||
     currentRequestHeader?.headers?.["Content-Type"] ||
     "/null";
-
+  /** 有些选项某些请求不存在，例如get请求不存在请求体，那么重置key */
+  if (requestMethod !== "POST" && (activeKeyReq === "2" || activeKeyReq === "3")) {
+    setActiveKeyReq("1");
+  }
+  if (codeMode !== "json" && activeKey === "2") {
+    setActiveKey("1");
+  }
   return (
     <>
       <div
