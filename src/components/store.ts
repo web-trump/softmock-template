@@ -1,5 +1,5 @@
 import { action, autorun, makeAutoObservable, computed, runInAction } from "mobx";
-import { History, Updates, UpdateInfo, DeleteInfo, ClearAll, CreateRecord } from "../api";
+import { History, Updates, UpdateInfo, DeleteInfo, ClearAll, CreateRecord, Replay } from "../api";
 import { uuid } from "../utils";
 
 class Store {
@@ -82,10 +82,14 @@ class Store {
     const url = scheme + "://" + host + path.split("?")[0];
     await UpdateInfo(btoa(url), newRequest);
   };
-  /** 获取历史记录 */
-  getHistory = autorun(async () => {
+  /** 手动获取历史记录 */
+  @action getHistoryActive = async () => {
     const res = await History();
     this.history = res;
+  };
+  /** 获取历史记录 */
+  getHistory = autorun(() => {
+    this.getHistoryActive();
   });
   /** 删除记录 */
   @action Delete = async (url = this.currentUrl, request = this.currentRequest) => {
@@ -261,6 +265,12 @@ class Store {
     /** 更新history */
     this.history.push(req);
     this.index = "0-0";
+  };
+  /** 重播 */
+  replayRequest = async () => {
+    const url = this.currentUrl;
+    await Replay(url);
+    this.getHistoryActive();
   };
 }
 

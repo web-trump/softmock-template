@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import React, { useState, useEffect } from "react";
-import { Table, Switch, Button, Tabs, Input, Tag, notification, Empty } from "antd";
+import { Table, Switch, Button, Tabs, Input, Tag, notification, Empty, message } from "antd";
 import cls from "classnames";
 
 import store from "../store";
@@ -24,6 +24,7 @@ function RightArea() {
     history,
     updateCurrentRequest,
     Delete,
+    replayRequest,
   } = store;
   const [isListen, setIsListen] = useState<boolean>(false);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
@@ -40,6 +41,10 @@ function RightArea() {
     currentRequest.status = value ? "1" : "0";
     setIsListen(value);
     updateCurrentRequest({ ...currentRequest });
+  };
+  const replayHandle = async () => {
+    await replayRequest();
+    message.success("更新成功");
   };
   useEffect(() => {
     setIsListen(+currentRequest?.status === 1);
@@ -84,12 +89,23 @@ function RightArea() {
     </div>
   );
   const RequestTitle = (
-    <div
-      style={{
-        color: "#999",
-      }}
-    >
-      {currentUrl}
+    <div className="request-tools">
+      <div
+        style={{
+          color: "#999",
+        }}
+      >
+        {currentUrl}
+      </div>
+      <Button
+        type="primary"
+        shape="round"
+        size="small"
+        className="replay-btn"
+        onClick={replayHandle}
+      >
+        replay
+      </Button>
     </div>
   );
   const requestMethod = currentRequest?.request?.method || "GET";

@@ -19,3 +19,5 @@ export const ClearAll = (): Promise<string> => request.post("/clear_all");
 /** 新增记录 */
 export const CreateRecord = (url: string, req: any): Promise<string> =>
   request.post("/create?url=" + btoa(url), req);
+/** 重新请求 */
+export const Replay = (url: string): Promise<string> => request.post("/replay?url=" + btoa(url));
