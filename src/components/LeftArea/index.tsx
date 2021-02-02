@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 import { observer } from "mobx-react";
 import { Input, Menu, Modal, message, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
@@ -13,15 +13,6 @@ import "./index.less";
 import { exception } from "console";
 
 const { SubMenu } = Menu;
-
-const Option = Select.Option;
-
-const selectBefore = (
-  <Select defaultValue="http://" className="select-before">
-    <Option value="http://">http://</Option>
-    <Option value="https://">https://</Option>
-  </Select>
-);
 
 function LeftArea() {
   const {
@@ -49,8 +40,13 @@ function LeftArea() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [newUrl, setNewUrl] = useState<string>("");
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const selectHandle = ({ key }: any) => {
     setCurrentRequest(key);
+  };
+  const openChangeHandle = (openKeys: any[]) => {
+    setOpenKeys(openKeys);
+    localStorage.setItem("openKeys", JSON.stringify(openKeys));
   };
   const clearAllHandle = async () => {
     /** 清除列表 */
@@ -98,6 +94,10 @@ function LeftArea() {
       message.warn("链接已存在");
     }
   };
+  useLayoutEffect(() => {
+    const keys = JSON.parse(localStorage.getItem("openKeys") || "[]");
+    setOpenKeys(keys);
+  }, []);
   return (
     <div className="left-container">
       <div className="logo">
@@ -128,6 +128,8 @@ function LeftArea() {
         <Menu
           style={{ width: "100%" }}
           defaultOpenKeys={historyTitles}
+          openKeys={openKeys}
+          onOpenChange={openChangeHandle}
           mode="inline"
           theme="dark"
           onSelect={selectHandle}

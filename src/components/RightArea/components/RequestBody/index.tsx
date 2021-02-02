@@ -24,6 +24,7 @@ function RequestBody() {
     setValue(jsBeautify(currentRequestBody));
   }, [currentRequestBody]);
   const blurHandle = () => {};
+
   return (
     <div className="body-req-container">
       <CodeMirror

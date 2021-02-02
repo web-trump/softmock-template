@@ -7,11 +7,13 @@ class Store {
     makeAutoObservable(this);
   }
   /** 当前指针 */
-  index: string = "0-0";
+  index: string = localStorage.getItem("index") || "0-0";
   /** 历史记录 */
   history: any[] = [];
   /** 过滤文本 */
   filterText: string = "";
+  /** 最后mock的时间 */
+  lastMockDate: Date = new Date();
   /** 连接状态 */
   linkStatus: boolean = false;
   /** 连接状态文字 */
@@ -22,6 +24,10 @@ class Store {
   @action switchTheme = () => {
     this.theme = this.theme === "ayu-mirage" ? "eclipse" : "ayu-mirage";
     localStorage.setItem("theme", this.theme);
+  };
+  /** 更新mock */
+  @action updateLastMockDate = () => {
+    this.lastMockDate = new Date();
   };
   /** 历史记录标题 */
   @computed get historyTitles() {
@@ -140,6 +146,7 @@ class Store {
   /** 设置当前请求 */
   @action setCurrentRequest = (index: string) => {
     this.index = index;
+    localStorage.setItem("index", this.index);
   };
   /** 当前请求的请求头 */
   @computed get currentRequestHeader() {

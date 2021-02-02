@@ -25,11 +25,18 @@ function RightArea() {
     updateCurrentRequest,
     Delete,
     replayRequest,
+    updateLastMockDate,
   } = store;
   const [isListen, setIsListen] = useState<boolean>(false);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeKey, setActiveKey] = useState<"1" | "2" | "3">("1");
   const [activeKeyReq, setActiveKeyReq] = useState<"1" | "2" | "3" | "4">("1");
+  const mockHandle = () => {
+    updateLastMockDate();
+    Promise.resolve(void 0).then(() => {
+      setActiveKey("1");
+    });
+  };
   const showNotification = async () => {
     await Delete();
     notification.info({
@@ -44,7 +51,7 @@ function RightArea() {
   };
   const replayHandle = async () => {
     await replayRequest();
-    message.success("更新成功");
+    message.success("replay完成");
   };
   useEffect(() => {
     setIsListen(+currentRequest?.status === 1);
@@ -63,6 +70,11 @@ function RightArea() {
           width: "8px",
         }}
       ></div>
+      {activeKey === "2" && (
+        <Button className="full-screen-btn" shape="round" size="small" danger onClick={mockHandle}>
+          Mock data
+        </Button>
+      )}
       {fullScreen ? (
         <Button
           className="full-screen-btn"
