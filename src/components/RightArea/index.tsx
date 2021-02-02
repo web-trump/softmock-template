@@ -8,6 +8,7 @@ import RequestHeader from "./components/RequestHeader";
 import RequestCookie from "./components/RequestCookie";
 import RequestBody from "./components/RequestBody";
 import RequestTs from "./components/RequestTs";
+import RequestSetting from "./components/RequestSetting";
 import ResponseHeader from "./components/ResponseHeader";
 import ResponseBody from "./components/ResponseBody";
 import ResponseTs from "./components/ResponseTs";
@@ -183,6 +184,7 @@ function RightArea() {
               />
             )}
             <TabPane tab="Cookies" key="4" />
+            <TabPane tab="设置" key="5" />
           </Tabs>
           {activeKeyReq === "1" ? (
             <RequestHeader />
@@ -190,8 +192,10 @@ function RightArea() {
             <RequestBody />
           ) : activeKeyReq === "3" ? (
             <RequestTs />
-          ) : (
+          ) : activeKeyReq === "4" ? (
             <RequestCookie />
+          ) : (
+            <RequestSetting />
           )}
         </div>
         <div className={cls("content-container", { "full-screen": fullScreen })}>

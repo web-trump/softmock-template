@@ -32,13 +32,13 @@ class Store {
   /** 历史记录标题 */
   @computed get historyTitles() {
     const historyTitles: string[] = Array.from(
-      new Set(this.history.map((item) => item.request.host))
+      new Set(this.history.map((item) => item.request.scheme + "://" + item.request.host))
     );
     return historyTitles;
   }
   @computed get filterHistoryTitles() {
     const historyTitles: string[] = Array.from(
-      new Set(this.filterHistory.map((item) => item.request.host))
+      new Set(this.filterHistory.map((item) => item.request.scheme + "://" + item.request.host))
     );
     return historyTitles;
   }
@@ -68,7 +68,9 @@ class Store {
     if (!this.filterHistoryTitles.length) return {};
     const title = this.filterHistoryTitles[+index];
     if (!title) return {};
-    const item = this.filterHistory.filter((item) => item.request.host === title)[historyIndex];
+    const item = this.filterHistory.filter(
+      (item) => item.request.scheme + "://" + item.request.host === title
+    )[historyIndex];
     return item;
   }
   /** 当前url */

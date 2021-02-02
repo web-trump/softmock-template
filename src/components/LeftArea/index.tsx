@@ -17,7 +17,6 @@ const { SubMenu } = Menu;
 function LeftArea() {
   const {
     history,
-    historyTitles,
     index,
     linkStatus,
     linkText,
@@ -56,7 +55,9 @@ function LeftArea() {
   };
   const deleteTitle = (e: any, title: string) => {
     e.stopPropagation();
-    const historyTarget = history.filter((item) => item.request.host === title);
+    const historyTarget = history.filter(
+      (item) => item.request.scheme + "://" + item.request.host === title
+    );
     for (let his of historyTarget) {
       const { scheme, host, path } = his.request;
       const url = scheme + "://" + host + path.split("?")[0];
@@ -127,7 +128,6 @@ function LeftArea() {
       <div className="menu">
         <Menu
           style={{ width: "100%" }}
-          defaultOpenKeys={historyTitles}
           openKeys={openKeys}
           onOpenChange={openChangeHandle}
           mode="inline"
@@ -136,7 +136,9 @@ function LeftArea() {
           defaultSelectedKeys={[index]}
         >
           {filterHistoryTitles.map((title, index: number) => {
-            const thisHistory = filterHistory.filter((item) => item.request.host === title);
+            const thisHistory = filterHistory.filter(
+              (item) => item.request.scheme + "://" + item.request.host === title
+            );
             return (
               <SubMenu
                 title={title + "  " + thisHistory.length}
