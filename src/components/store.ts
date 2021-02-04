@@ -183,6 +183,7 @@ class Store {
       return JSON.stringify(this.parseParams(this.currentRequest?.request?.raw_content || ""));
     }
   }
+  /** 将query解析成对象 */
   parseParams = (params: string) => {
     return params.split("&").reduce((pre: any, next) => {
       const item = next.split("=");
@@ -190,8 +191,19 @@ class Store {
       return pre;
     }, {});
   };
-
-  /** 设置当前请求体 */
+  /** 将对象解析成query */
+  dumpParams = (dict: { [index: string]: any }) => {
+    const result = [];
+    for (let i of Object.keys(dict)) {
+      const value = dict[i];
+      result.push(
+        i +
+          "=" +
+          (typeof value === "number" || typeof value === "string" ? value : JSON.stringify(value))
+      );
+    }
+    return result.join("&");
+  };
   /** 创建请求 */
   createRequest = async (scheme: string, host: string, path: string) => {
     const port = scheme === "https" ? 443 : 80;
@@ -280,6 +292,21 @@ class Store {
     const url = this.currentUrl;
     await Replay(url);
     this.getHistoryActive();
+  };
+  /** 设置请求体 */
+  setRequestBody = (dict: any) => {
+    const contentType =
+      this.currentRequestHeader?.headers?.["content-type"] ||
+      this.currentRequestHeader?.headers?.["Content-Type"] ||
+      "/null";
+    let data = "";
+    if (contentType.includes("json")) {
+      data = JSON.stringify(dict);
+    } else {
+      data = this.dumpParams(dict);
+    }
+    this.currentRequest.request.raw_content = data;
+    this.updateCurrentRequest({ ...this.currentRequest });
   };
 }
 

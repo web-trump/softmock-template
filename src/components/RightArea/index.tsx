@@ -117,7 +117,7 @@ function RightArea() {
         className="replay-btn"
         onClick={replayHandle}
       >
-        replay
+        重播
       </Button>
     </div>
   );

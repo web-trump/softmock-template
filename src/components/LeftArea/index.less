@@ -92,3 +92,39 @@
   top: 0;
   color: #fff;
 }
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  height: 40px !important;
+  line-height: 18px;
+  justify-content: center;
+  &:hover {
+    & > span:first-child {
+      color: #fff;
+    }
+  }
+
+  & > span:first-child {
+    font-size: 14px;
+    color: #bbb;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+  }
+  & > span:last-child {
+    color: #bbb;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+  }
+}
+.ant-menu-item-selected {
+  .menu-container {
+    & > span:first-child {
+      color: #fff;
+    }
+  }
+}

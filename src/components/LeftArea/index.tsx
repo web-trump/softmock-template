@@ -10,7 +10,6 @@ import AddLogo from "../../assets/add.svg";
 
 import store from "../store";
 import "./index.less";
-import { exception } from "console";
 
 const { SubMenu } = Menu;
 
@@ -147,7 +146,10 @@ function LeftArea() {
               >
                 {thisHistory.map((item, historyIndex: number) => (
                   <Menu.Item key={index + "-" + historyIndex}>
-                    {item.request.path.split("?")[0]}
+                    <div className="menu-container">
+                      <span>{item.request.aliasName || item.request.path.split("?")[0]}</span>
+                      <span>{item.request.aliasName && item.request.path.split("?")[0]}</span>
+                    </div>
                   </Menu.Item>
                 ))}
               </SubMenu>
