@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useLayoutEffect } from "react";
 import { observer } from "mobx-react";
-import { Input, Menu, Modal, message, Select } from "antd";
+import { Input, Menu, Modal, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import GithubLogo from "../../assets/github.svg";
 import Logo from "../../assets/logo.jpg";
@@ -22,6 +22,7 @@ function LeftArea() {
     filterText,
     filterHistory,
     filterHistoryTitles,
+    currentUrl,
     getUpdates,
     setCurrentRequest,
     Delete,
@@ -31,13 +32,12 @@ function LeftArea() {
     getFilterHistory,
     createRequest,
   } = store;
-  useEffect(() => {
-    /** 启动websockt */
-    getUpdates();
-  }, []);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  /** 当前url */
   const [newUrl, setNewUrl] = useState<string>("");
+  /** 请求方式 */
+  const [method, setMethod] = useState<string>("GET");
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const selectHandle = ({ key }: any) => {
     setCurrentRequest(key);
@@ -71,8 +71,7 @@ function LeftArea() {
       path =
         Array.from(newUrl)
           .slice((scheme + host).length + 3)
-          .join("")
-          .split("?")[0] || "/";
+          .join("") || "/";
     } catch (e) {
       message.error("请输入正确的url");
       return;
@@ -85,10 +84,10 @@ function LeftArea() {
       return;
     }
     /** 较检是否已经存在 */
-    const checked = !getFilterHistory(newUrl).length;
+    const checked = !getFilterHistory(newUrl.split("?")[0] + " " + method).length;
     if (checked) {
       setShowAddModal(false);
-      await createRequest(scheme.trim(), host.trim(), path.trim());
+      await createRequest(scheme.trim(), host.trim(), path.trim(), method);
       message.success("创建成功");
     } else {
       message.warn("链接已存在");
@@ -98,6 +97,15 @@ function LeftArea() {
     const keys = JSON.parse(localStorage.getItem("openKeys") || "[]");
     setOpenKeys(keys);
   }, []);
+  useEffect(() => {
+    /** 启动websockt */
+    getUpdates();
+  }, []);
+  useEffect(() => {
+    const [newUrl, method] = currentUrl.split(" ");
+    setNewUrl(newUrl);
+    setMethod(method);
+  }, [currentUrl]);
   return (
     <div className="left-container">
       <div className="logo">
@@ -146,9 +154,12 @@ function LeftArea() {
               >
                 {thisHistory.map((item, historyIndex: number) => (
                   <Menu.Item key={index + "-" + historyIndex}>
-                    <div className="menu-container">
-                      <span>{item.request.aliasName || item.request.path.split("?")[0]}</span>
-                      <span>{item.request.aliasName && item.request.path.split("?")[0]}</span>
+                    <div className="menu-sub">
+                      <div className="method">{item.request.method}</div>
+                      <div className="menu-container">
+                        <span>{item.request.aliasName || item.request.path.split("?")[0]}</span>
+                        <span>{item.request.aliasName && item.request.path.split("?")[0]}</span>
+                      </div>
                     </div>
                   </Menu.Item>
                 ))}
@@ -180,8 +191,16 @@ function LeftArea() {
       >
         <Input
           placeholder="请输入需要监听的url"
+          prefix="监听url："
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
+        ></Input>
+        <div className="wrap-16"></div>
+        <Input
+          placeholder="请输入请求方式"
+          prefix="请求方式："
+          value={method}
+          onChange={(e) => setMethod(e.target.value)}
         ></Input>
       </Modal>
     </div>

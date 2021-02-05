@@ -19,8 +19,15 @@ function RequestSetting() {
       : currentRequest.request.path;
     currentRequest.request.method = method.current.toUpperCase() || currentRequest.request.method;
     currentRequest.request.aliasName = aliasName.current || "";
-    await updateCurrentRequest(currentRequest);
-    message.success("更新成功，刷新后使用");
+    const provideUrl =
+      currentRequest.request.scheme +
+      "://" +
+      currentRequest.request.host +
+      currentRequest.path.split("?")[0] +
+      " " +
+      method;
+    await updateCurrentRequest(currentRequest, provideUrl);
+    message.success("更新成功");
   };
   return (
     <div key={currentUrl}>

@@ -13,7 +13,8 @@ export const UpdateInfo = (url: string, detail: any): Promise<string> =>
     data: detail,
   });
 /** 删除记录 */
-export const DeleteInfo = (url: string): Promise<string> => request.post("/delete_flow?url=" + url);
+export const DeleteInfo = (url: string): Promise<string> =>
+  request.post("/delete_flow?url=" + btoa(url));
 /** 清除所有 */
 export const ClearAll = (): Promise<string> => request.post("/clear_all");
 /** 新增记录 */

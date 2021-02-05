@@ -53,9 +53,9 @@ class Store {
   }
   getFilterHistory = (text: string) => {
     return this.history.filter((item) => {
-      const { scheme, host, path } = item.request;
-      const url = scheme + "://" + host + path.split("?")[0];
-      return url.includes(text);
+      const { scheme, host, path, method } = item.request;
+      const url = scheme + "://" + host + path.split("?")[0] + " " + method;
+      return new RegExp(text).test(url);
     });
   };
   /** 设置过滤文本 */
@@ -68,26 +68,27 @@ class Store {
     if (!this.filterHistoryTitles.length) return {};
     const title = this.filterHistoryTitles[+index];
     if (!title) return {};
-    const item = this.filterHistory.filter(
-      (item) => item.request.scheme + "://" + item.request.host === title
-    )[historyIndex];
+    const item = this.filterHistory.filter((item) => {
+      const { scheme, host } = item.request;
+      return scheme + "://" + host === title;
+    })[historyIndex];
     return item;
   }
   /** 当前url */
   @computed get currentUrl() {
     if (!this.currentRequest?.request) return "";
-    const { scheme, host, path } = this.currentRequest.request;
-    const url = scheme + "://" + host + path.split("?")[0];
+    const { scheme, host, path, method } = this.currentRequest.request;
+    const url = scheme + "://" + host + path.split("?")[0] + " " + method;
     return url;
   }
   /** 更新当前请求 */
-  @action updateCurrentRequest = async (newRequest: any) => {
+  @action updateCurrentRequest = async (newRequest: any, provideUrl: string | null = null) => {
     const current = this.history.find((item) => item === this.currentRequest);
     Object.assign(current, newRequest);
     this.history = [...this.history];
     if (!newRequest.request) return;
-    const { scheme, host, path } = newRequest.request;
-    const url = scheme + "://" + host + path.split("?")[0];
+    const { scheme, host, path, method } = newRequest.request;
+    const url = provideUrl || scheme + "://" + host + path.split("?")[0] + " " + method;
     await UpdateInfo(btoa(url), newRequest);
   };
   /** 手动获取历史记录 */
@@ -101,7 +102,7 @@ class Store {
   });
   /** 删除记录 */
   @action Delete = async (url = this.currentUrl, request = this.currentRequest) => {
-    await DeleteInfo(btoa(url));
+    await DeleteInfo(url);
     const currentIndex = this.history.findIndex((item) => item === request);
     this.history.splice(currentIndex, 1);
     this.history = [...this.history];
@@ -114,11 +115,11 @@ class Store {
     ut.onmessage = (evt) => {
       const { cmd, data } = JSON.parse(evt.data);
       if (cmd === "update") {
-        const { scheme, host, path } = data.request;
-        const url = scheme + "://" + host + path.split("?")[0];
+        const { scheme, host, path, method } = data.request;
+        const url = scheme + "://" + host + path.split("?")[0] + " " + method;
         const me = this.history.find((item) => {
-          const { scheme, host, path } = item.request;
-          return url === scheme + "://" + host + path.split("?")[0];
+          const { scheme, host, path, method } = item.request;
+          return url === scheme + "://" + host + path.split("?")[0] + " " + method;
         });
         if (me) {
           me.request = data.request;
@@ -205,7 +206,7 @@ class Store {
     return result.join("&");
   };
   /** 创建请求 */
-  createRequest = async (scheme: string, host: string, path: string) => {
+  createRequest = async (scheme: string, host: string, path: string, method: string) => {
     const port = scheme === "https" ? 443 : 80;
     /** 构建新的请求 */
     const req: any = {
@@ -230,7 +231,7 @@ class Store {
       host,
       http_version: "HTTP/2.0",
       is_replay: false,
-      method: "GET",
+      method,
       path,
       port,
       pretty_host: host,
@@ -278,7 +279,7 @@ class Store {
       via2: null,
     };
     /** 请求接口 */
-    await CreateRecord(scheme + "://" + host + path, {
+    await CreateRecord(scheme + "://" + host + path + " " + method, {
       cmd: "update",
       resource: "flows",
       data: req,
