@@ -23,7 +23,7 @@ function RequestSetting() {
       currentRequest.request.scheme +
       "://" +
       currentRequest.request.host +
-      currentRequest.path.split("?")[0] +
+      currentRequest.request.path.split("?")[0] +
       " " +
       method;
     await updateCurrentRequest(currentRequest, provideUrl);

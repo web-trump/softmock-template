@@ -55,7 +55,7 @@ class Store {
     return this.history.filter((item) => {
       const { scheme, host, path, method } = item.request;
       const url = scheme + "://" + host + path.split("?")[0] + " " + method;
-      return new RegExp(text).test(url);
+      return (JSON.stringify(item) + " " + url).includes(text);
     });
   };
   /** 设置过滤文本 */
